@@ -1,20 +1,17 @@
-/* app/globals.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-midnight-black: #0A0A0A;
+  --color-soft-cream: #F5E8D3;
+  --color-editorial-white: #FAFAFA;
+  --color-lavender-accent: #C8B6FF;
+  --color-deep-violet: #5B3DF5;
+  --color-soft-pink: #E8C7FF;
+  --color-mouse-gray: #888888;
+  --color-glass-border: rgba(255, 255, 255, 0.1);
+}
 
 @layer base {
-  :root {
-    --midnight-black: #0A0A0A;
-    --soft-cream: #F5E8D3;
-    --editorial-white: #FAFAFA;
-    --lavender-accent: #C8B6FF;
-    --deep-violet: #5B3DF5;
-    --soft-pink: #E8C7FF;
-    --mouse-gray: #888888;
-    --glass-border: rgba(255, 255, 255, 0.1);
-  }
-
   * {
     cursor: none;
   }
@@ -24,47 +21,19 @@
   }
 
   body {
-    background-color: var(--midnight-black);
-    color: var(--editorial-white);
-    font-family: var(--font-inter);
+    background-color: var(--color-midnight-black);
+    color: var(--color-editorial-white);
+    font-family: Inter, sans-serif;
     overflow-x: hidden;
   }
 
-  /* Custom selection */
   ::selection {
-    background: var(--lavender-accent);
-    color: var(--midnight-black);
-  }
-
-  /* Smooth scroll for Lenis */
-  html.lenis {
-    height: auto;
-  }
-
-  .lenis.lenis-smooth {
-    scroll-behavior: auto;
-  }
-
-  /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: var(--midnight-black);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: var(--lavender-accent);
-    border-radius: 3px;
+    background: var(--color-lavender-accent);
+    color: var(--color-midnight-black);
   }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-  
   .backdrop-blur-xl {
     backdrop-filter: blur(24px);
   }
