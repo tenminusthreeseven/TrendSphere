@@ -4,7 +4,7 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
-const navItems = ['Platform', 'Analytics', 'Forecasting', 'Insights', 'Contact'];
+const navItems = ['Upload', 'Analytics', 'Forecasting', 'Insights', 'Contact'];
 
 export default function Navbar() {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);

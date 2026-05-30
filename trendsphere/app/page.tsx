@@ -1,4 +1,3 @@
-// app/page.tsx
 'use client';
 
 import { useEffect, useRef } from 'react';
@@ -10,7 +9,6 @@ import TechnologyArchitecture from '@/components/TechnologyArchitecture';
 import UseCases from '@/components/UseCases';
 import ContactDemo from '@/components/ContactDemo';
 import Footer from '@/components/Footer';
-import CustomCursor from '@/components/CustomCursor';
 
 export default function Home() {
   useEffect(() => {
@@ -35,7 +33,6 @@ export default function Home() {
 
   return (
     <>
-      <CustomCursor />
       <main className="bg-midnight-black text-editorial-white overflow-x-hidden">
         <Hero />
         <AboutPlatform />

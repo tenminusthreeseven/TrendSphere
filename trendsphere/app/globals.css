@@ -12,24 +12,20 @@
 }
 
 @layer base {
-  * {
-    cursor: none;
-  }
-
   html {
     scroll-behavior: smooth;
   }
 
   body {
-    background-color: var(--color-midnight-black);
-    color: var(--color-editorial-white);
+    background-color: #0A0A0A;
+    color: #FAFAFA;
     font-family: Inter, sans-serif;
     overflow-x: hidden;
   }
 
   ::selection {
-    background: var(--color-lavender-accent);
-    color: var(--color-midnight-black);
+    background: #C8B6FF;
+    color: #0A0A0A;
   }
 }
 

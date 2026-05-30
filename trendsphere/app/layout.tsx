@@ -1,4 +1,3 @@
-// app/layout.tsx
 import type { Metadata } from 'next';
 import { Inter, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
@@ -27,7 +26,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${cormorant.variable}`}>
-      <body className="bg-midnight-black">{children}</body>
+      <body className="bg-midnight-black">
+        {children}
+      </body>
     </html>
   );
 }

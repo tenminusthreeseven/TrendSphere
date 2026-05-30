@@ -1,11 +1,10 @@
-// components/Hero.tsx
 'use client';
 
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import Image from 'next/image';
 import Navbar from './Navbar';
 import FloatingCardStrip from './FloatingCardStrip';
+import ExcelUpload from './ExcelUpload';
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,10 +29,6 @@ export default function Hero() {
           <div className="absolute bottom-20 right-10 w-80 h-80 bg-deep-violet/30 rounded-full blur-[120px]" />
           <div className="absolute top-1/2 left-1/2 w-[600px] h-[600px] bg-soft-pink/10 rounded-full blur-[150px]" />
         </div>
-        {/* Floating analytics particles */}
-        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-lavender-accent rounded-full animate-pulse" />
-        <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-soft-pink rounded-full animate-pulse animation-delay-200" />
-        <div className="absolute bottom-1/3 left-1/4 w-3 h-3 bg-deep-violet rounded-full animate-pulse animation-delay-400" />
       </motion.div>
 
       {/* Mid-ground: TRENDSPHERE typography */}
@@ -55,8 +50,13 @@ export default function Hero() {
       <div className="relative z-20 h-full">
         <Navbar />
         
-        {/* Floating Analytics Panel */}
-        <div className="absolute bottom-32 left-12 md:left-20">
+        {/* Excel Upload Box - LEFT POSITION with large size */}
+        <div className="absolute top-1/2 left-16 transform -translate-y-1/2 z-50">
+          <ExcelUpload />
+        </div>
+
+        {/* Floating Analytics Panel - Right side */}
+        <div className="absolute top-32 right-12 md:right-20">
           <div className="backdrop-blur-xl bg-midnight-black/40 border border-glass-border rounded-2xl p-6 w-80">
             <h3 className="text-mouse-gray text-xs tracking-[0.2em] uppercase mb-4">Live Intelligence</h3>
             <div className="space-y-3">
@@ -80,15 +80,9 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Right side floating elements */}
-        <div className="absolute right-12 top-1/3 space-y-4">
-          <div className="w-32 h-32 bg-gradient-to-br from-soft-cream/10 to-lavender-accent/20 rounded-2xl backdrop-blur-sm border border-glass-border" />
-          <div className="w-24 h-24 bg-gradient-to-tl from-deep-violet/20 to-soft-pink/10 rounded-full backdrop-blur-sm border border-glass-border" />
-        </div>
-
         {/* Launch Platform Button */}
         <motion.button
-          className="absolute bottom-32 right-12 px-8 py-4 bg-soft-cream text-midnight-black rounded-full font-medium hover:bg-gradient-to-r hover:from-lavender-accent hover:to-deep-violet hover:text-editorial-white transition-all duration-300 backdrop-blur-sm"
+          className="absolute bottom-12 right-12 px-8 py-4 bg-soft-cream text-midnight-black rounded-full font-medium hover:bg-gradient-to-r hover:from-lavender-accent hover:to-deep-violet hover:text-editorial-white transition-all duration-300 backdrop-blur-sm z-30"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -96,7 +90,7 @@ export default function Hero() {
         </motion.button>
 
         {/* Social Icons */}
-        <div className="absolute right-8 top-1/2 transform -translate-y-1/2 space-y-4">
+        <div className="absolute right-8 top-1/2 transform -translate-y-1/2 space-y-4 z-30">
           {['in', 'gh', 'x'].map((icon) => (
             <a key={icon} href="#" className="block text-editorial-white/40 hover:text-lavender-accent transition-colors text-sm">
               {icon.toUpperCase()}
