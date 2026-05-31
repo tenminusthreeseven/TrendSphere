@@ -14,6 +14,16 @@ const architectureLayers = [
   { name: 'Visualization', items: ['AWS QuickSight'], color: 'from-sky-500/20 to-blue-500/20' },
 ];
 
+// Deterministic particles so SSR and client render match
+const particles = Array.from({ length: 20 }, (_, i) => {
+  const left = (i * 17) % 100;
+  const top = (i * 29) % 100;
+  const duration = 3 + (i % 5);
+  const delay = (i % 6) * 0.4;
+
+  return { left, top, duration, delay };
+});
+
 export default function TechnologyArchitecture() {
   const [ref, inView] = useInView({
     triggerOnce: true,
@@ -33,47 +43,58 @@ export default function TechnologyArchitecture() {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { 
-        duration: 0.6, 
-        ease: [0.16, 1, 0.3, 1] as const
-      } 
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: [0.16, 1, 0.3, 1] as const,
+      },
     },
   };
 
   return (
-    <section className="py-32 bg-gradient-to-b from-midnight-black via-deep-violet/5 to-midnight-black relative overflow-hidden">
+    <section className="relative overflow-hidden py-32 bg-gradient-to-b from-midnight-black via-deep-violet/5 to-midnight-black">
       {/* Background atmospheric elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-lavender-accent/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-deep-violet/10 rounded-full blur-[140px]" />
-        {[...Array(20)].map((_, i) => (
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-10 top-20 h-72 w-72 rounded-full bg-lavender-accent/10 blur-[120px]" />
+        <div className="absolute bottom-20 right-10 h-96 w-96 rounded-full bg-deep-violet/10 blur-[140px]" />
+
+        {particles.map((particle, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-lavender-accent/20 rounded-full"
-            initial={{ opacity: 0 }}
+            className="absolute h-1 w-1 rounded-full bg-lavender-accent/20"
+            initial={{ opacity: 0, y: 0 }}
             animate={{ opacity: [0, 0.5, 0], y: [0, -100] }}
-            transition={{ duration: Math.random() * 5 + 3, repeat: Infinity, delay: Math.random() * 5 }}
-            style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
+            transition={{
+              duration: particle.duration,
+              repeat: Infinity,
+              delay: particle.delay,
+              ease: 'easeInOut',
+            }}
+            style={{
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
+            }}
           />
         ))}
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
         <div className="mb-20 text-center">
-          <div className="flex items-center justify-center gap-4 mb-4">
+          <div className="mb-4 flex items-center justify-center gap-4">
             <div className="h-px w-12 bg-editorial-white/20" />
-            <h2 className="text-xs tracking-[0.3em] uppercase text-mouse-gray">03 — TECHNOLOGY</h2>
+            <h2 className="text-xs uppercase tracking-[0.3em] text-mouse-gray">03 — TECHNOLOGY</h2>
             <div className="h-px w-12 bg-editorial-white/20" />
           </div>
-          <h3 className="text-5xl font-condensed tracking-tight text-editorial-white">TECHNOLOGY STACK</h3>
+          <h3 className="text-5xl font-condensed tracking-tight text-editorial-white">
+            TECHNOLOGY STACK
+          </h3>
         </div>
 
         <motion.div
           ref={ref}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4"
           variants={containerVariants}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
@@ -81,20 +102,22 @@ export default function TechnologyArchitecture() {
           {architectureLayers.map((layer, idx) => (
             <motion.div
               key={idx}
-              className={`group bg-gradient-to-br ${layer.color} backdrop-blur-sm border border-glass-border rounded-2xl p-6 transition-all duration-300 hover:border-lavender-accent hover:-translate-y-2 hover:shadow-lg hover:shadow-lavender-accent/10`}
+              className={`group relative overflow-hidden rounded-2xl border border-glass-border bg-gradient-to-br ${layer.color} p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:border-lavender-accent hover:shadow-lg hover:shadow-lavender-accent/10`}
               variants={itemVariants}
               whileHover={{ scale: 1.02 }}
             >
-              <h3 className="text-sm font-medium text-editorial-white/80 mb-3">{layer.name}</h3>
+              <h3 className="mb-3 text-sm font-medium text-editorial-white/80">{layer.name}</h3>
+
               <div className="space-y-1">
                 {layer.items.map((item, itemIdx) => (
-                  <p key={itemIdx} className="text-editorial-white/40 text-sm">
+                  <p key={itemIdx} className="text-sm text-editorial-white/40">
                     {item}
                   </p>
                 ))}
               </div>
+
               {/* Animated connection line glow on hover */}
-              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-lavender-accent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-lavender-accent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
             </motion.div>
           ))}
         </motion.div>
