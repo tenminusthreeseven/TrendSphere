@@ -1,32 +1,53 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useRef, useState, type ChangeEvent, type DragEvent, type MouseEvent } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 export default function ExcelUpload() {
   const [file, setFile] = useState<File | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  // 3D tilt effect values
+  const dragCounter = useRef(0);
+
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  
+
   const mouseXSpring = useSpring(x, { stiffness: 400, damping: 30 });
   const mouseYSpring = useSpring(y, { stiffness: 400, damping: 30 });
-  
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["15deg", "-15deg"]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-15deg", "15deg"]);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ['15deg', '-15deg']);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ['-15deg', '15deg']);
+
+  const isValidFile = (selectedFile: File) => {
+    const allowedExtensions = ['.xlsx', '.xls', '.csv'];
+    const fileName = selectedFile.name.toLowerCase();
+    const isAllowedType = allowedExtensions.some((ext) => fileName.endsWith(ext));
+    const isAllowedSize = selectedFile.size <= 50 * 1024 * 1024; // 50MB
+    return isAllowedType && isAllowedSize;
+  };
+
+  const setSelectedFile = (selectedFile: File | null) => {
+    if (!selectedFile) return;
+
+    if (!isValidFile(selectedFile)) {
+      alert('Please upload a valid .xlsx, .xls, or .csv file under 50MB.');
+      return;
+    }
+
+    setFile(selectedFile);
+    console.log('File selected:', selectedFile.name);
+  };
+
+  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return;
+
     const rect = containerRef.current.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-    const mouseX = (e.clientX - rect.left) / width - 0.5;
-    const mouseY = (e.clientY - rect.top) / height - 0.5;
+    const mouseX = (e.clientX - rect.left) / rect.width - 0.5;
+    const mouseY = (e.clientY - rect.top) / rect.height - 0.5;
+
     x.set(mouseX);
     y.set(mouseY);
   };
@@ -37,36 +58,60 @@ export default function ExcelUpload() {
     setIsHovered(false);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      console.log('File selected:', selectedFile.name);
-    }
+  const openFilePicker = () => {
+    fileInputRef.current?.click();
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] ?? null;
+    if (selectedFile) {
+      setSelectedFile(selectedFile);
+    }
+    e.target.value = '';
+  };
+
+  const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current += 1;
     setIsDragging(true);
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    setIsDragging(false);
+    e.stopPropagation();
+    setIsDragging(true);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    setIsDragging(false);
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && (droppedFile.name.endsWith('.xlsx') || droppedFile.name.endsWith('.xls') || droppedFile.name.endsWith('.csv'))) {
-      setFile(droppedFile);
-      console.log('File dropped:', droppedFile.name);
+    e.stopPropagation();
+    dragCounter.current -= 1;
+
+    if (dragCounter.current <= 0) {
+      dragCounter.current = 0;
+      setIsDragging(false);
     }
   };
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    dragCounter.current = 0;
+    setIsDragging(false);
+
+    const droppedFile = e.dataTransfer.files?.[0] ?? null;
+    if (droppedFile) {
+      setSelectedFile(droppedFile);
+    }
+  };
+
+  const clearFile = () => {
+    setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -74,8 +119,8 @@ export default function ExcelUpload() {
       ref={containerRef}
       className="relative z-50"
       style={{
-        perspective: "1000px",
-        transformStyle: "preserve-3d",
+        perspective: '1000px',
+        transformStyle: 'preserve-3d',
       }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
@@ -83,40 +128,32 @@ export default function ExcelUpload() {
     >
       <motion.div
         style={{
-          rotateX: rotateX,
-          rotateY: rotateY,
-          transformStyle: "preserve-3d",
+          rotateX,
+          rotateY,
+          transformStyle: 'preserve-3d',
         }}
-        animate={{
-          y: isHovered ? -10 : 0,
-        }}
+        animate={{ y: isHovered ? -10 : 0 }}
         transition={{
-          type: "spring",
+          type: 'spring',
           stiffness: 400,
           damping: 30,
         }}
       >
         <div
-          className={`w-[500px] backdrop-blur-xl rounded-3xl border-2 transition-all duration-500 overflow-hidden
-            ${isDragging 
-              ? 'border-lavender-accent bg-lavender-accent/20 scale-105' 
+          className={`relative w-[500px] backdrop-blur-xl rounded-3xl border-2 transition-all duration-500 overflow-hidden
+            ${isDragging
+              ? 'border-lavender-accent bg-lavender-accent/20 scale-105'
               : isHovered
-              ? 'border-lavender-accent bg-midnight-black/60 shadow-2xl shadow-lavender-accent/30'
-              : 'border-glass-border bg-midnight-black/40 shadow-xl'
+                ? 'border-lavender-accent bg-midnight-black/60 shadow-2xl shadow-lavender-accent/30'
+                : 'border-glass-border bg-midnight-black/40 shadow-xl'
             }`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
         >
-          {/* Animated gradient border */}
           <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-lavender-accent/0 via-lavender-accent/30 to-deep-violet/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-          
+
           {/* Header */}
           <div className="p-8 pb-0">
             <motion.div
-              animate={{
-                rotate: isHovered ? 360 : 0,
-              }}
+              animate={{ rotate: isHovered ? 360 : 0 }}
               transition={{ duration: 0.6 }}
               className="text-5xl mb-4 inline-block"
             >
@@ -126,20 +163,33 @@ export default function ExcelUpload() {
               Fashion Data Import
             </h3>
             <p className="text-sm text-mouse-gray leading-relaxed">
-              Upload Excel or CSV files containing fashion trends,<br />
+              Upload Excel or CSV files containing fashion trends,
+              <br />
               inventory data, or consumer behavior analytics
             </p>
           </div>
-          
+
           {/* Upload Area */}
           <div className="p-8">
-            <motion.div
-              animate={{
-                scale: isDragging ? 1.02 : 1,
-                backgroundColor: isDragging ? "rgba(200, 182, 255, 0.1)" : "rgba(255, 255, 255, 0.05)",
+            <div
+              className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 cursor-pointer
+                ${isDragging
+                  ? 'border-lavender-accent bg-lavender-accent/10'
+                  : 'border-glass-border hover:border-lavender-accent bg-white/5'
+                }`}
+              onClick={openFilePicker}
+              onDragEnter={handleDragEnter}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  openFilePicker();
+                }
               }}
-              className="border-2 border-dashed border-glass-border rounded-2xl p-12 text-center cursor-pointer transition-all duration-300 hover:border-lavender-accent"
-              onClick={handleUploadClick}
             >
               <input
                 ref={fileInputRef}
@@ -148,7 +198,7 @@ export default function ExcelUpload() {
                 onChange={handleFileChange}
                 className="hidden"
               />
-              
+
               <motion.div
                 animate={{
                   y: isHovered ? [0, -10, 0] : 0,
@@ -156,30 +206,42 @@ export default function ExcelUpload() {
                 transition={{
                   duration: 1,
                   repeat: isHovered ? Infinity : 0,
-                  repeatType: "reverse",
+                  repeatType: 'reverse',
                 }}
                 className="text-7xl mb-4"
               >
-                {isDragging ? "📁✨" : "📂"}
+                {isDragging ? '📁✨' : '📂'}
               </motion.div>
-              
+
               <p className="text-lg text-editorial-white/80 mb-2 font-medium">
-                {isDragging ? "Drop your file here" : "Drag & drop or click to upload"}
+                {isDragging ? 'Drop your file here' : 'Drag & drop or select from device'}
               </p>
+
               <p className="text-sm text-mouse-gray">
                 Supports .xlsx, .xls, .csv files up to 50MB
               </p>
-              
-              {/* File format badges */}
-              <div className="flex gap-3 justify-center mt-6">
-                <span className="text-xs px-3 py-1.5 bg-editorial-white/10 rounded-full hover:bg-lavender-accent/20 transition-colors cursor-pointer">
+
+              <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openFilePicker();
+                  }}
+                  className="text-xs px-4 py-2 bg-editorial-white/10 rounded-full hover:bg-lavender-accent/20 transition-colors cursor-pointer"
+                >
+                  Select from device
+                </button>
+
+                <span className="text-xs px-4 py-2 bg-editorial-white/10 rounded-full hover:bg-lavender-accent/20 transition-colors cursor-pointer">
                   Excel (.xlsx)
                 </span>
-                <span className="text-xs px-3 py-1.5 bg-editorial-white/10 rounded-full hover:bg-lavender-accent/20 transition-colors cursor-pointer">
+
+                <span className="text-xs px-4 py-2 bg-editorial-white/10 rounded-full hover:bg-lavender-accent/20 transition-colors cursor-pointer">
                   CSV
                 </span>
               </div>
-            </motion.div>
+            </div>
 
             {/* Selected file preview */}
             {file && (
@@ -188,18 +250,22 @@ export default function ExcelUpload() {
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-6 p-4 bg-lavender-accent/10 rounded-2xl border border-lavender-accent/30"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
                     <span className="text-2xl">✅</span>
-                    <div>
-                      <p className="text-sm font-medium text-editorial-white">{file.name}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-editorial-white truncate">
+                        {file.name}
+                      </p>
                       <p className="text-xs text-mouse-gray">
                         {(file.size / 1024).toFixed(2)} KB
                       </p>
                     </div>
                   </div>
+
                   <button
-                    onClick={() => setFile(null)}
+                    type="button"
+                    onClick={clearFile}
                     className="text-xs text-red-400 hover:text-red-300 transition-colors"
                   >
                     Remove
@@ -209,21 +275,24 @@ export default function ExcelUpload() {
             )}
           </div>
 
-          {/* Action Buttons with 3D hover effect */}
+          {/* Action Buttons */}
           <div className="p-8 pt-0 border-t border-glass-border flex gap-4">
             <motion.button
+              type="button"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setFile(null)}
+              onClick={clearFile}
               className="flex-1 py-3 text-sm tracking-[0.1em] uppercase border border-glass-border rounded-xl hover:border-red-500/50 hover:text-red-400 transition-all duration-300"
             >
               Clear
             </motion.button>
+
             <motion.button
-              whileHover={{ 
-                scale: 1.05, 
+              type="button"
+              whileHover={{
+                scale: 1.05,
                 y: -2,
-                boxShadow: "0 10px 30px -10px rgba(200, 182, 255, 0.5)"
+                boxShadow: '0 10px 30px -10px rgba(200, 182, 255, 0.5)',
               }}
               whileTap={{ scale: 0.95 }}
               onClick={() => {
@@ -239,36 +308,6 @@ export default function ExcelUpload() {
               Analyze Now ✨
             </motion.button>
           </div>
-
-          {/* 3D floating particles effect on hover */}
-          {isHovered && (
-            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
-              {[...Array(20)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute w-1 h-1 bg-lavender-accent rounded-full"
-                  initial={{
-                    x: Math.random() * 500,
-                    y: Math.random() * 600,
-                    opacity: 0,
-                  }}
-                  animate={{
-                    y: [null, -100],
-                    opacity: [0, 1, 0],
-                  }}
-                  transition={{
-                    duration: Math.random() * 2 + 1,
-                    repeat: Infinity,
-                    delay: Math.random() * 2,
-                  }}
-                  style={{
-                    left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 100}%`,
-                  }}
-                />
-              ))}
-            </div>
-          )}
         </div>
       </motion.div>
     </motion.div>
