@@ -1,22 +1,18 @@
 package services
 
-import (
-	"fmt"
-	"time"
+import "trendsphere/backend/models"
 
-	"trendsphere/backend/models"
-)
+var Results = map[string]models.Result{}
 
-var Jobs = map[string]models.Job{}
-
-func CreateJob(fileName, s3Key string) models.Job {
-	job := models.Job{
-		ID:       fmt.Sprintf("job_%d", time.Now().UnixNano()),
-		Status:   "uploaded",
-		S3Key:    s3Key,
-		FileName: fileName,
+func GenerateMockResult(jobID string) models.Result {
+	result := models.Result{
+		JobID:        jobID,
+		TotalRows:    1500,
+		AveragePrice: 1299.99,
+		TopCategory:  "Men Shoes",
+		Status:       "completed",
 	}
 
-	Jobs[job.ID] = job
-	return job
+	Results[jobID] = result
+	return result
 }

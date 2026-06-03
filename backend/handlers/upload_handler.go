@@ -28,6 +28,9 @@ func UploadFile(c *gin.Context) {
 
 	job := services.CreateJob(file.Filename, key)
 
+	result := services.GenerateMockResult(job.ID)
+_ = result
+
 	c.JSON(http.StatusOK, gin.H{
 		"jobId":   job.ID,
 		"status":  job.Status,
