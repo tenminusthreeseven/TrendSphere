@@ -7,8 +7,7 @@ import (
 )
 
 func SetupRoutes(router *gin.Engine) {
-
 	router.GET("/health", handlers.HealthCheck)
-
 	router.POST("/upload", handlers.UploadFile)
+	router.GET("/jobs/:id/status", handlers.GetJobStatus)
 }

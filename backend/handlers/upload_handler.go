@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"net/http"
+
 	"trendsphere/backend/aws"
+	"trendsphere/backend/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,9 +26,13 @@ func UploadFile(c *gin.Context) {
 		return
 	}
 
+	job := services.CreateJob(file.Filename, key)
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": "File uploaded successfully",
-		"key":     key,
+		"jobId":   job.ID,
+		"status":  job.Status,
+		"file":    file.Filename,
 		"s3Url":   s3URL,
+		"message": "File uploaded successfully",
 	})
 }
